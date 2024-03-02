@@ -45,8 +45,6 @@ def test_redirects(client, name, args):
     assertRedirects(response, expected_url)
 
 
-
-
 # from http import HTTPStatus
 
 # from django.contrib.auth import get_user_model

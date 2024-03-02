@@ -61,7 +61,7 @@ class TestContent(TestCase):
         login_url = reverse('users:login')
         expected_url = f'{login_url}?next={url}'
         self.assertRedirects(response, expected_url)
-        assert Note.objects.count() == 0
+        self.assertEquals (Note.objects.count(), 0)
 
     def test_not_unique_slug(self):
         note = Note.objects.create(title='Заголовок', text='Текст', author=self.author, slug='test_slug')
@@ -84,7 +84,7 @@ class TestContent(TestCase):
         self.assertEquals(Note.objects.count(), 1)
         new_note = Note.objects.get()
         expected_slug = slugify(form_data['title'])
-        assert new_note.slug == expected_slug
+        self.assertEquals (new_note.slug,  expected_slug)
 
     def test_author_can_edit_note(self):
         form_data = self.make_form_data()
@@ -97,9 +97,9 @@ class TestContent(TestCase):
         self.assertRedirects(response, reverse('notes:success'))
         note.refresh_from_db()
 
-        assert note.title == form_data['title']
-        assert note.text == form_data['text']
-        assert note.slug == form_data['slug']
+        self.assertEquals (note.title, form_data['title'])
+        self.assertEquals (note.text,  form_data['text'])
+        self.assertEquals (note.slug, form_data['slug'])
 
     def test_other_user_cant_edit_note(self):
         form_data = self.make_form_data()
@@ -107,11 +107,11 @@ class TestContent(TestCase):
 
         url = reverse('notes:edit', args=(note.slug,))
         response = self.not_author_client.post(url, form_data)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+        self.assertEquals (response.status_code, HTTPStatus.NOT_FOUND)
         note_from_db = Note.objects.get(id=note.id)
-        assert note.title == note_from_db.title
-        assert note.text == note_from_db.text
-        assert note.slug == note_from_db.slug
+        self.assertEquals (note.title, note_from_db.title)
+        self.assertEquals (note.text, note_from_db.text)
+        self.assertEquals (note.slug, note_from_db.slug)
 
     def test_author_can_delete_note(self):
         note = Note.objects.create(title='Заголовок', text='Текст', author=self.author, slug="test_slug")
@@ -119,12 +119,12 @@ class TestContent(TestCase):
         url = reverse('notes:delete', args=('test_slug', ))
         response = self.author_client.post(url)
         self.assertRedirects(response, reverse('notes:success'))
-        assert Note.objects.count() == 0
+        self.assertEquals (Note.objects.count(), 0)
 
     def test_other_user_cant_delete_note(self):
         note = Note.objects.create(title='Заголовок', text='Текст', author=self.author, slug="test_slug")
 
         url = reverse('notes:delete', args=("test_slug", ))
         response = self.not_author_client.post(url)
-        assert response.status_code == HTTPStatus.NOT_FOUND
-        assert Note.objects.count() == 1
+        self.assertEquals (response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEquals (Note.objects.count(), 1)
